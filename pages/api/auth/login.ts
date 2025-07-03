@@ -13,30 +13,52 @@ export default async function loginhandler(
      if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
      const { name, password } = req.body;
 
-      try {
-    // Search in Conducteurs
+       
+
+  try {
+    // Try to find user in Admin
+    const admin = await prisma.admin.findFirst({ where: { name } });
+    if (admin && bcrypt.compareSync(password, admin.password)) {
+      const token = jwt.sign({ id: admin.id, name: admin.name,role:"admin" }, JWT_SECRET, {
+        expiresIn: '1h',
+      });
+      return res
+        .status(200)
+        .json({ message: 'Login successful', token, role: 'admin' });
+    }
+
+    // Try to find user in Conducteur
     const conducteur = await prisma.conducteur.findFirst({ where: { name } });
-
-    // Search in Passagers if not found in Conducteurs
-    const user = conducteur || await prisma.passager.findFirst({ where: { name } });
-
-    if (!user) {
-      return res.status(401).json({ error: 'User not found' });
+    if (conducteur && bcrypt.compareSync(password, conducteur.password)) {
+      const token = jwt.sign(
+        { id: conducteur.id, name: conducteur.name,role:"conducteur" },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+      return res
+        .status(200)
+        .json({ message: 'Login successful', token, role: 'conducteur' });
     }
 
-    // Compare plaintext passwords (you should use bcrypt in real projects)
-    const isPasswordMatch = password === user.password;
-
-    if (!isPasswordMatch) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    // Try to find user in Passager
+    const passager = await prisma.passager.findFirst({ where: { name } });
+    if (passager && bcrypt.compareSync( password,passager.password)) {
+      const token = jwt.sign(
+        { id: passager.id, name: passager.name ,role:"passager"},
+        JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+      return res
+        .status(200)
+        .json({ message: 'Login successful', token, role: 'passager' });
     }
 
-    // Generate JWT
-    const token = jwt.sign({ id: user.id, name: user.name }, JWT_SECRET, { expiresIn: '1h' });
-
-    return res.status(200).json({ message: 'Login successful', token, role: conducteur ? 'conducteur' : 'passager' });
+    // If none matched
+    return res.status(401).json({ error: 'Invalid credentials' });
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ error: 'Something went wrong' });
+  } finally {
+    await prisma.$disconnect();
   }
 }

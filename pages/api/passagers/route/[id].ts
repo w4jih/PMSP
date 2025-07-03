@@ -1,13 +1,16 @@
+import { withAuthorization } from "@/lib/withAuthorization";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 import { NextApiRequest, NextApiResponse } from "next";
 
 
 
 const prisma = new PrismaClient();
-export default async function Conduteurs_Handler(
+const handler= async (
     req:NextApiRequest,
     res:NextApiResponse
-){
+) =>{
+     const id = parseInt(req.query.id as string);
      if( req.method=== "GET"){
         const id = parseInt(req.query.id as string);
         const passagers = await prisma.passager.findMany({where : { id}});
@@ -38,9 +41,10 @@ export default async function Conduteurs_Handler(
             return res.status(400).json({error:"missing id"})
         }
         try{
+        const hashedpassword=bcrypt.hashSync(password,10)
         const updatedpassagers =await prisma.passager.update({
             where:{ id },
-             data: { name, lastname, Cin,password },
+             data: { name, lastname, Cin,password:hashedpassword },
 
         })
         return res.status(200).json({message:`Conducteur with the ID ${id} was seccessfuly updated` })}
@@ -49,3 +53,5 @@ export default async function Conduteurs_Handler(
         }
      }
 }
+
+export default withAuthorization(['admin', 'passager'], handler);

@@ -25,6 +25,7 @@ model Conducteur{
   name    String 
   lastname String
   Cin     String
+  email   String
   password String
 
 }
@@ -34,5 +35,12 @@ model Passager{
   name    String 
   lastname String 
   Cin      String
+  email    String 
+  password  String
+}
+
+model Admin{
+  id      Int   @id @default(autoincrement())
+  name     String
   password  String
 }
