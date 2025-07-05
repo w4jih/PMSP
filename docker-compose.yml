@@ -1,0 +1,31 @@
+services:
+  # Base de production
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: nawara0.1
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+
+  # Base de test (nouvelle instance)
+  db_test:
+    image: postgres:15
+    container_name: pmsp-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: mydb_test
+    ports:
+      - "5433:5432"  # Port différent pour éviter les conflits
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  postgres_prod_data:
+  postgres_test_data:
