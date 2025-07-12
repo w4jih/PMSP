@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client/extension";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -21,7 +21,8 @@ export default async function conducteursPostHandler(
                 const newConducteur =await prisma.conducteur.create({
                     data: {name, lastname , Cin,email, password:hashedpassword}
                 } )
-        
+                
+                
                 return res.status(201).json({message: "conducteur created seccessfully"})
              }
      }

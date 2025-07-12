@@ -13,5 +13,5 @@ export function verifyToken(req: NextApiRequest) {
 
   const token = authHeader.split(' ')[1];
   const decoded = jwt.verify(token, JWT_SECRET);
-  return decoded as { id: string; name: string; role: string };
+  return decoded as { id: number; name: string; role: string };
 }

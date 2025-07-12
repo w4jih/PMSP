@@ -14,6 +14,7 @@ async function main() {
       data: {
         name: 'admin',
         password: bcrypt.hashSync('admin123', 10),
+        kmprice: 20,
         
       },
     });
