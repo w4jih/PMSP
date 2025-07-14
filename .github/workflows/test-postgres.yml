@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:15
@@ -16,8 +17,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: test_password
           POSTGRES_DB: mydb_test
-        ports:
-          - 5433:5432
+        # pas besoin de ports ici
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -26,15 +26,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          
+
       - run: npm ci
-      
-      - run: npx prisma migrate dev --name init
+
+      # Attendre que Postgres soit healthy (optionnel si health‑check OK)
+      - run: npx prisma migrate deploy
         env:
-          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/mydb_test
-          
+          DATABASE_URL: postgresql://postgres:test_password@postgres:5432/mydb_test
+
       - run: npm test
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@postgres:5432/mydb_test
