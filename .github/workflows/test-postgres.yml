@@ -17,7 +17,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: test_password
           POSTGRES_DB: mydb_test
-        # pas besoin de ports ici
+        
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -33,7 +33,7 @@ jobs:
 
       - run: npm ci
 
-      # Attendre que Postgres soit healthy (optionnel si health‑check OK)
+    
       - run: npx prisma migrate deploy
         env:
           DATABASE_URL: postgresql://postgres:test_password@postgres:5432/mydb_test
