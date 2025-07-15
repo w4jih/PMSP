@@ -13,7 +13,10 @@ jobs:
     services:
       postgres:
         image: postgres:15
-        
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: mydb_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -28,7 +31,7 @@ jobs:
           node-version: 20
 
       - run: npm ci
-
+      - run: npx prisma generate
     
       - run: npx prisma migrate deploy
         env:
