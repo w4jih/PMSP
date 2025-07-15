@@ -1,5 +1,5 @@
 services:
-  db:  # Base de production
+  db:  
     image: postgres:15
     container_name: pmsp-db-prod
     environment:
@@ -7,11 +7,11 @@ services:
       POSTGRES_PASSWORD: nawara0.1
       POSTGRES_DB: mydb
     ports:
-      - "5433:5432"  # Port externe 5433 → interne 5432
+      - "5433:5432"  
     volumes:
       - postgres_prod_data:/var/lib/postgresql/data
 
-  db_test:  # Base de test
+  db_test:  
     image: postgres:15
     container_name: pmsp-db-test
     environment:
@@ -19,7 +19,7 @@ services:
       POSTGRES_PASSWORD: test_password
       POSTGRES_DB: mydb_test
     ports:
-      - "5432:5432"  # Port externe 5432 → interne 5432
+      - "5432:5432"  
     volumes:
       - postgres_test_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
