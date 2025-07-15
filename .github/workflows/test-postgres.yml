@@ -2,9 +2,9 @@
 
 on:
   push:
-    branches: [ main ]
+    branches: [ docker-setup ]
   pull_request:
-    branches: [ main ]
+    branches: [ docker-setup ]
 
 jobs:
   test:
@@ -15,8 +15,8 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: mydb_test
+          POSTGRES_PASSWORD: nawara0.1
+          POSTGRES_DB: mydb
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -35,8 +35,8 @@ jobs:
     
       - run: npx prisma migrate deploy
         env:
-          DATABASE_URL: postgresql://postgres:test_password@postgres:5432/mydb_test
+          DATABASE_URL: postgresql://postgres:nawara0.1@postgres:5433/mydb
 
       - run: npm test
         env:
-          DATABASE_URL: postgresql://postgres:test_password@postgres:5432/mydb_test
+          DATABASE_URL: postgresql://postgres:nawara0.1@postgres:5433/mydb
