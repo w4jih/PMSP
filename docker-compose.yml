@@ -4,7 +4,7 @@ services:
     container_name: pmsp-db-prod
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: glace%20123
+      POSTGRES_PASSWORD: nawara0.1
       POSTGRES_DB: mydb
     ports:
       - "5432:5432"  

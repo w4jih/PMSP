@@ -35,8 +35,8 @@ jobs:
     
       - run: npx prisma migrate deploy
         env:
-          DATABASE_URL: postgresql://postgres:glace 123@postgres:5432/mydb
+          DATABASE_URL: postgresql://postgres:nawara0.1@postgres:5432/mydb
 
       - run: npm test
         env:
-          DATABASE_URL: postgresql://postgres:glace 123@postgres:5432/mydb
+          DATABASE_URL: postgresql://postgres:nawara0.1@postgres:5432/mydb

@@ -7,10 +7,14 @@
     "test:watch": "npx dotenv -e .env.test -- jest --watch",
     "test:cov": "npx dotenv -e .env.test -- jest --coverage",
     "prisma:generate": "prisma generate",
-    "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:test": "dotenv -e .env.test -- prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:reset": "prisma migrate reset"
+    "prisma:reset": "prisma migrate reset",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "deploy": "npx prisma migrate deploy"
   },
   "dependencies": {
     "@prisma/client": "^6.11.0",
