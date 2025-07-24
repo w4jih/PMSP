@@ -1,4 +1,4 @@
-﻿name: PostgreSQL & CI Tests
+name: PostgreSQL & CI Tests
 
 on:
   push:
@@ -17,6 +17,8 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: glace 123
           POSTGRES_DB: mydb
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -31,12 +33,13 @@ jobs:
           node-version: 20
 
       - run: npm ci
+
       - run: npx prisma generate
-    
+
       - run: npx prisma migrate deploy
         env:
-          DATABASE_URL: postgresql://postgres:glace%20123@postgres:5432/mydb
+          DATABASE_URL: postgresql://postgres:glace%20123@localhost:5432/mydb
 
       - run: npm test
         env:
-          DATABASE_URL: postgresql://postgres:glace%20123@postgres:5432/mydb
+          DATABASE_URL: postgresql://postgres:glace%20123@localhost:5432/mydb
