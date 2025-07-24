@@ -1,4 +1,4 @@
-import { withAuthorization } from "@/lib/withAuthorization";
+import { withAuthorization } from "../../../lib/withAuthorization";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -27,17 +27,16 @@ const  handler=async(req:NextApiRequest,res:NextApiResponse)=>{
         }
     }
 
-    if(req.method=='DELETE'){
-        try{
-            const {id}=req.query
-            const deletedvihecule= prisma.vehicule.delete({
-                where:{id:Number(id)}
-            })
-        }
-        catch(err){
-            return res.status(500).json({err})
-        }
-    }
+    if (req.method == 'DELETE') {
+  try {
+    const { id } = req.query;
+    await prisma.vehicule.delete({  // <-- Add await here
+      where: { id: Number(id) },
+    });
+    return res.status(200).json({ message: 'Vehicule deleted successfully' });
+  } catch (err) {
+    return res.status(500).json({ error: 'server error' });
+  }}
 
     if(req.method=='PUT'){
         try{
@@ -53,11 +52,13 @@ const  handler=async(req:NextApiRequest,res:NextApiResponse)=>{
                     type: type
                 }
             })
+            return res.status(200).json(updatedVehicule);
         }
         catch(err){
             return res.status(500).json({err})
         }
     }
-} 
 
+}
 export default withAuthorization(['admin','conducteur'],handler);
+

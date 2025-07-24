@@ -1,4 +1,4 @@
-import { withAuthorization } from "@/lib/withAuthorization";
+import { withAuthorization } from "../../../lib/withAuthorization";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -12,7 +12,7 @@ const handler=async(req:NextApiRequest,res:NextApiResponse)=>{
     const id =parseInt(req.query.id as string)
     if(req.method =='GET') {
      try{
-        const getreservations= prisma.reservation.findUnique({
+        const getreservations= await prisma.reservation.findUnique({
             where:{id:id}
         })
         return res.status(200).json({message:"the reservation is ",reservation:getreservations})
@@ -23,9 +23,10 @@ const handler=async(req:NextApiRequest,res:NextApiResponse)=>{
 
 if(req.method=='DELETE'){
     try{
-        const deletereservation=prisma.reservation.delete({
+        const   deletereservation=await prisma.reservation.delete({
             where: {id:id}
         })
+        return res.status(200).json({message:"reservation deleted successfully"})
     }
     catch(err){
         return res.status(500).json({error:"reservation not found"})
@@ -62,6 +63,7 @@ if(req.method=='PUT'){
                 endTime:endTime
             }
         })
+        res.status(200).json({message:"reservation updated successfully", reservation:updatedreservation})
     }
     catch(err){
         return res.status(500).json({error:"reservation not found"})

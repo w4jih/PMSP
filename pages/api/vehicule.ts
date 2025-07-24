@@ -1,4 +1,4 @@
-import { withAuthorization } from "@/lib/withAuthorization";
+import { withAuthorization } from "../../lib/withAuthorization";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -20,6 +20,9 @@ const  viheculehandler=async(req:NextApiRequest,res:NextApiResponse)=>{
             return res.status(500).json({err})
         }
      }
+     if (req.method !== 'GET') {
+  return res.status(405).json({ error: 'Method Not Allowed' });
+}
 
 
      

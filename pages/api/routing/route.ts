@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
-import { withAuthorization } from '@/lib/withAuthorization';
+import { withAuthorization } from '../../../lib/withAuthorization';
+ 
 
 const ORS_API_KEY = process.env.ORS_API_KEY!;
 const handler=async (req: NextApiRequest, res: NextApiResponse)=> {

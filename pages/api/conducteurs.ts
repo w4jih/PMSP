@@ -1,4 +1,4 @@
-import { withAuthorization } from "@/lib/withAuthorization";
+import { withAuthorization } from "../../lib/withAuthorization";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { NextApiRequest, NextApiResponse } from "next";

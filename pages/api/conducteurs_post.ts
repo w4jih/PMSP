@@ -3,12 +3,12 @@ import bcrypt from "bcryptjs";
 import { NextApiRequest, NextApiResponse } from "next";
 
 
-
+//endpoint(http:localhost:3000/api/vehicule/1)
 
 
 const prisma = new PrismaClient();
 
-export default async function conducteursPostHandler(
+export default async function conducteursPostHandle(
     req:NextApiRequest,
      res:NextApiResponse) {
         if (req.method ==="POST"){

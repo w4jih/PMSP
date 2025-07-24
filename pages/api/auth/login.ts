@@ -3,7 +3,12 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
-const JWT_SECRET = process.env.JWT_SECRET!
+const JWT_SECRET = () => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined');
+  }
+  return process.env.JWT_SECRET;
+};
 
 const prisma =new PrismaClient()
 export default async function loginhandler(
@@ -19,7 +24,7 @@ export default async function loginhandler(
     // Try to find user in Admin
     const admin = await prisma.admin.findFirst({ where: { name } });
     if (admin && bcrypt.compareSync(password, admin.password)) {
-      const token = jwt.sign({ id: admin.id, name: admin.name,role:"admin" }, JWT_SECRET, {
+      const token = jwt.sign({ id: admin.id, name: admin.name,role:"admin" }, JWT_SECRET(), {
         expiresIn: '1h',
       });
       return res
@@ -32,7 +37,7 @@ export default async function loginhandler(
     if (conducteur && bcrypt.compareSync(password, conducteur.password)) {
       const token = jwt.sign(
         { id: conducteur.id, name: conducteur.name,role:"conducteur" },
-        JWT_SECRET,
+        JWT_SECRET(),
         { expiresIn: '1h' }
       );
       return res
@@ -45,7 +50,7 @@ export default async function loginhandler(
     if (passager && bcrypt.compareSync( password,passager.password)) {
       const token = jwt.sign(
         { id: passager.id, name: passager.name ,role:"passager"},
-        JWT_SECRET,
+        JWT_SECRET(),
         { expiresIn: '1h' }
       );
       return res

@@ -1,4 +1,4 @@
-import { withAuthorization } from "@/lib/withAuthorization";
+import { withAuthorization } from "../../../lib/withAuthorization";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -10,10 +10,14 @@ const prisma = new PrismaClient();
 const handler = async (req: NextApiRequest, res: NextApiResponse, user: any) => {
   const id = parseInt(req.query.id as string);
 
-  if (req.method === 'GET') {
+ if (req.method === 'GET') {
+  try {
     const conducteurs = await prisma.conducteur.findMany({ where: { id } });
     return res.status(200).json(conducteurs);
+  } catch (error) {
+    return res.status(500).json({ error: 'server error' });
   }
+}
 
   if (req.method === 'DELETE') {
     if (!id) return res.status(400).json({ error: 'Missing ID' });

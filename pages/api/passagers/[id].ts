@@ -1,4 +1,4 @@
-import { withAuthorization } from "@/lib/withAuthorization";
+import { withAuthorization } from "../../../lib/withAuthorization";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -11,11 +11,20 @@ const handler= async (
     res:NextApiResponse
 ) =>{
      const id = parseInt(req.query.id as string);
-     if( req.method=== "GET"){
-        const id = parseInt(req.query.id as string);
-        const passagers = await prisma.passager.findMany({where : { id}});
-        return res.status(200).json(passagers)
-     }
+     if (req.method === "GET") {
+  try {
+    const id = parseInt(req.query.id as string);
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ error: "Invalid id" });
+    }
+
+    const passagers = await prisma.passager.findMany({ where: { id } });
+    return res.status(200).json(passagers);
+  } catch (error) {
+    console.error("GET /passagers/[id] error:", error);
+    return res.status(500).json({ error: "server error" });
+  }
+}
      
     
      if (req.method === "DELETE"){
