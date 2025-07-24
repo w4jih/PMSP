@@ -1,0 +1,42 @@
+﻿name: PostgreSQL & CI Tests
+
+on:
+  push:
+    branches: [ docker-setup ]
+  pull_request:
+    branches: [ docker-setup ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: glace 123
+          POSTGRES_DB: mydb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+      - run: npx prisma generate
+    
+      - run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:glace 123@postgres:5433/mydb
+
+      - run: npm test
+        env:
+          DATABASE_URL: postgresql://postgres:glace 123@postgres:5433/mydb
