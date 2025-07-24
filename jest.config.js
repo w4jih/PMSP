@@ -9,5 +9,5 @@ module.exports = {
     ...tsJestTransformCfg,
   },
   preset: 'ts-jest',
-  
-  setupFilesAfterEnv: ['C:/Users/21655/Desktop/PMSP2/PMSP/jest.setup.ts'],}
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+};
