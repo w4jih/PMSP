@@ -2,9 +2,9 @@
 
 on:
   push:
-    branches: [ docker-setup ]
+    branches: [ pipeline ]
   pull_request:
-    branches: [ docker-setup ]
+    branches: [ pipeline ]
 
 jobs:
   test:
