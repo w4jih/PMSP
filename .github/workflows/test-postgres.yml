@@ -12,10 +12,10 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: postgres:15.6
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: glace 123
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: mydb
         ports:
           - 5432:5432
@@ -38,8 +38,8 @@ jobs:
 
       - run: npx prisma migrate deploy
         env:
-          DATABASE_URL: postgresql://postgres:glace%20123@localhost:5432/mydb
+          DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/mydb
 
       - run: npm test
         env:
-          DATABASE_URL: postgresql://postgres:glace%20123@localhost:5432/mydb
+          DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/mydb
