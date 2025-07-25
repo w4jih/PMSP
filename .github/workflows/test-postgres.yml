@@ -12,7 +12,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15.6
+        image: postgres:15
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}  # ✅ plus de mot de passe en clair
