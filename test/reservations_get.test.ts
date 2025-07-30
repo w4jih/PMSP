@@ -21,11 +21,25 @@ jest.mock('../lib/withAuthorization', () => {
 jest.mock('../lib/auth', () => ({
   verifyToken: jest.fn().mockReturnValue({ id: 123 }),
 }));
+// Correctly mock the prisma instance used by the handler
+jest.mock('../lib/prisma', () => ({
+  __esModule: true,
+  default: {
+    reservation: {
+    findFirst: jest.fn(),
+    create: jest.fn(),
+    findMany: jest.fn(),
+    findUnique:jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  },
+  },
+}));
 
 import request from 'supertest';
 import { createTestServer } from './testserver';
 import handler from '../pages/api/reservations'; // adjust the path to your file
-import { prisma } from './__mocks__/prisma';
+import prisma from '../lib/prisma';
 
 describe('GET /api/reservations (with JWT auth)', () => {
   let server: any;
