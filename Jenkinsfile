@@ -4,6 +4,7 @@ pipeline {
     tools {
         nodejs "NodeJS_20"   // Must match the NodeJS installation name in Jenkins
     }
+    
 
     stages {
         stage('Checkout') {
@@ -24,6 +25,12 @@ pipeline {
             steps {
                 echo 'Building Next.js backend...'
                 bat 'npm run build'
+            }
+        }
+
+        stage('Prisma Generate') {
+            steps {
+                bat 'npx prisma generate'
             }
         }
 
