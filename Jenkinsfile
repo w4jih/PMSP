@@ -40,6 +40,11 @@ pipeline {
                 bat 'npx prisma migrate deploy'
             }
         }
+        stage('Seed Database') {
+            steps {
+                bat 'npm run seed'
+            }
+        }
 
         stage('Tests') {
             steps {
