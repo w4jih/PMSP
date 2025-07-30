@@ -23,7 +23,32 @@ import request from 'supertest';
 import { createTestServer } from './testserver';
 // Update the import path below to the correct relative path for your project structure
 import handler from '../pages/api/reservations_post'; // Adjust the path if needed
-import { prisma } from './__mocks__/prisma';
+jest.mock('../lib/prisma', () => ({
+  __esModule: true,
+  default: {
+   reservation: {
+    findFirst: jest.fn(),
+    create: jest.fn(),
+    findMany: jest.fn(),
+    findUnique:jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  },
+  vehicule: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      findMany: jest.fn(),
+      delete: jest.fn(),
+      update: jest.fn(),
+    },
+    trajectory: {
+    findFirst: jest.fn(),
+    create: jest.fn(),
+  },
+
+  },
+}));
+import prisma from '../lib/prisma';
 
 describe('POST /api/reservation (with JWT auth)', () => {
   let server: any;

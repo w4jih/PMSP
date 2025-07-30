@@ -20,7 +20,20 @@ jest.mock('../lib/withAuthorization', () => {
 import request from 'supertest';
 import { createTestServer } from './testserver';
 import handler from '../pages/api/reservations/[id]';
-import { prisma } from './__mocks__/prisma';
+jest.mock('../lib/prisma', () => ({
+  __esModule: true,
+  default: {
+   reservation: {
+    findFirst: jest.fn(),
+    create: jest.fn(),
+    findMany: jest.fn(),
+    findUnique:jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  },
+  },
+}));
+import prisma from '../lib/prisma';
 
 describe('Reservation /api/reservation/[id] (with JWT auth)', () => {
   let server: any;
