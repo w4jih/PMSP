@@ -20,7 +20,19 @@ jest.mock('../lib/withAuthorization', () => {
 import request from 'supertest';
 import { createTestServer } from './testserver';
 import handler from '../pages/api/conducteurs/[id]';
-import { prisma } from './__mocks__/prisma';
+jest.mock('../lib/prisma', () => ({
+  __esModule: true,
+  default: {
+   conducteur: {
+    create: jest.fn(),
+    findFirst: jest.fn(),
+    findMany: jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  },
+  },
+}));
+import prisma from '../lib/prisma';
 
 
 

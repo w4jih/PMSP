@@ -1,7 +1,19 @@
 import request from 'supertest';
 import { createTestServer } from './testserver';
 import conducteursPostHandle from '../pages/api/conducteurs_post';
-import { prisma } from './__mocks__/prisma'; 
+jest.mock('../lib/prisma', () => ({
+  __esModule: true,
+  default: {
+   conducteur: {
+    create: jest.fn(),
+    findFirst: jest.fn(),
+    findMany: jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  },
+  },
+}));
+import prisma from '../lib/prisma';
 
 describe('POST /api/conducteurs_post', () => {
   let server: any;
