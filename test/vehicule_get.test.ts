@@ -50,7 +50,7 @@ describe('GET /api/vehicule (with JWT auth)', () => {
 
   it('should return vehicules with valid admin token', async () => {
     (prisma.vehicule.findMany as jest.Mock).mockResolvedValue([
-      { id: 1, name: 'Toyota', type: 'SUV', conducteurId: 5 },
+      {id: 2, name: 'rrrr', type: 'bmw', conducteurId: 1, available: true},
     ]);
 
     const res = await request(server)
@@ -59,7 +59,7 @@ describe('GET /api/vehicule (with JWT auth)', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual([
-      { id: 1, name: 'Toyota', type: 'SUV', conducteurId: 5 },
+      {id: 2, name: 'rrrr', type: 'bmw', conducteurId: 1, available: true},
     ]);
   });
 

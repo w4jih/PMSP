@@ -43,7 +43,7 @@ export function createTestServer(
 
 
 
-export function createTestServer(handler: (req: NextApiRequest, res: NextApiResponse) => Promise<void> | void) {
+export function createTestServer(handler: (req: NextApiRequest, res: NextApiResponse) => Promise<void | NextApiResponse> | void) {
   const server = createServer((req, res) => {
     let body = '';
     req.on('data', chunk => { body += chunk.toString(); });
