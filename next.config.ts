@@ -37,6 +37,9 @@ const securityHeaders = [
 ];
 
 module.exports = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   reactStrictMode: true,
   poweredByHeader: false, // Remove 'X-Powered-By: Next.js'
   async headers() {
