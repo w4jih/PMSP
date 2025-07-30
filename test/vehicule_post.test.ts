@@ -1,7 +1,19 @@
 import request from 'supertest';
 import { createTestServer } from './testserver';
 import handler from '../pages/api/vehicule_post'; // adjust path as needed
-import { prisma } from './__mocks__/prisma';
+jest.mock('../lib/prisma', () => ({
+  __esModule: true,
+  default: {
+    vehicule: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  },
+  },
+}));
+import prisma from '../lib/prisma';
 
 describe('POST /api/vehicule_post', () => {
   let server: any;
