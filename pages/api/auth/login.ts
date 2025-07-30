@@ -10,8 +10,9 @@ const JWT_SECRET = () => {
   return process.env.JWT_SECRET;
 };
 
-const prisma =new PrismaClient()
-export default async function loginhandler(
+import prisma from "../../../lib/prisma"; 
+
+ export default async function loginhandler(
     req:NextApiRequest,
     res:NextApiResponse
 ) {

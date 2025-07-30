@@ -2,11 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { NextApiRequest, NextApiResponse } from "next";
 
-
-
-
-
-const prisma = new PrismaClient();
+import prisma from "../../lib/prisma"; 
 
 export default async function conducteursPostHandler(
     req:NextApiRequest,

@@ -6,8 +6,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 //endpoint(http:localhost:3000/api/vehicule/1)
 
 
-const prisma = new PrismaClient();
-
+import prisma from "../../lib/prisma"; 
 export default async function conducteursPostHandle(
     req:NextApiRequest,
      res:NextApiResponse) {

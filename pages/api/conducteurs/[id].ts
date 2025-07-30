@@ -5,9 +5,9 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 
 
-const prisma = new PrismaClient();
+import prisma from "../../../lib/prisma"; 
 
-const handler = async (req: NextApiRequest, res: NextApiResponse, user: any) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const id = parseInt(req.query.id as string);
 
  if (req.method === 'GET') {
