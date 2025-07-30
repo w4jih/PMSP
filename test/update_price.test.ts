@@ -20,7 +20,17 @@ jest.mock('../lib/withAuthorization', () => {
 import request from 'supertest';
 import { createTestServer } from './testserver';
 import handler from '../pages/api/admin'; // Adjust path to your file
-import { prisma } from './__mocks__/prisma';
+jest.mock('../lib/prisma', () => ({
+  __esModule: true,
+  default: {
+    admin: {
+    findFirst: jest.fn(),
+    update: jest.fn(),
+    findUnique: jest.fn(),
+  },
+  },
+}));
+import prisma from '../lib/prisma';
 
 describe('POST /api/updatePrice (with JWT auth)', () => {
   let server: any;
