@@ -42,4 +42,9 @@ export const prisma = {
   },
    $disconnect: jest.fn(),
   
+   
 };
+jest.mock('../../lib/prisma', () => ({
+  __esModule: true,
+  default: prisma, // default export matches "export default prisma"
+}));

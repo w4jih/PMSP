@@ -54,7 +54,7 @@ const  handler=async(req:NextApiRequest,res:NextApiResponse)=>{
             return res.status(200).json(updatedVehicule);
         }
         catch(err){
-            return res.status(500).json({err})
+            return res.status(500).json({ error: 'server error' })
         }
     }
 

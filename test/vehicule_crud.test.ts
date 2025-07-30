@@ -142,7 +142,18 @@ describe('Vehicule [id] Endpoint (with JWT auth)', () => {
   });
 });
 */
-
+// Correctly mock the prisma instance used by the handler
+jest.mock('../lib/prisma', () => ({
+  __esModule: true,
+  default: {
+    vehicule: {
+      findUnique: jest.fn(),
+      delete: jest.fn(),
+      update: jest.fn(),
+    },
+  },
+}));
+import prisma from '../lib/prisma';
 // -------- MOCK withAuthorization --------
 jest.mock('../lib/withAuthorization', () => {
   return {
@@ -164,7 +175,7 @@ jest.mock('../lib/withAuthorization', () => {
 
 // -------- MOCK Prisma --------
 jest.mock('./__mocks__/prisma');
-import { prisma } from './__mocks__/prisma';
+
 
 import request from 'supertest';
 import { createTestServer } from './testserver';
