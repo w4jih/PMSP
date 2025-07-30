@@ -1,7 +1,33 @@
 import request from 'supertest';
 import { createTestServer } from './testserver';
 import loginhandler from '../pages/api/auth/login'; // adjust path as needed
-import { prisma } from './__mocks__/prisma';
+jest.mock('../lib/prisma', () => ({
+  __esModule: true,
+  default: {
+   conducteur: {
+    create: jest.fn(),
+    findFirst: jest.fn(),
+    findMany: jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  },
+  passager: {
+    create: jest.fn(),
+    findFirst: jest.fn(),
+    findMany: jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  },
+    admin: {
+    findFirst: jest.fn(),
+    update: jest.fn(),
+    findUnique: jest.fn(),
+  },
+  $disconnect: jest.fn(), // <--- ADD THIS
+
+  },
+}));
+import prisma from '../lib/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 

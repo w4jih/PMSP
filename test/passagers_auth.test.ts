@@ -20,7 +20,19 @@ jest.mock('../lib/withAuthorization', () => {
 import request from 'supertest';
 import { createTestServer } from './testserver';
 import handler from '../pages/api/passagers'; // adjust the path if necessary
-import { prisma } from './__mocks__/prisma';
+jest.mock('../lib/prisma', () => ({
+  __esModule: true,
+  default: {
+   passager: {
+    create: jest.fn(),
+    findFirst: jest.fn(),
+    findMany: jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  },
+  },
+}));
+import prisma from '../lib/prisma';
 
 describe('GET /api/passagers (with JWT auth)', () => {
   let server: any;
