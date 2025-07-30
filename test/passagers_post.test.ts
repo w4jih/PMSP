@@ -1,7 +1,19 @@
 import request from 'supertest';
 import { createTestServer } from './testserver';
 import passagersPostHandler from '../pages/api/passagers_post';
-import { prisma } from './__mocks__/prisma';
+jest.mock('../lib/prisma', () => ({
+  __esModule: true,
+  default: {
+   passager: {
+    create: jest.fn(),
+    findFirst: jest.fn(),
+    findMany: jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+  },
+  },
+}));
+import prisma from '../lib/prisma';
 
 describe('POST /api/passagers_post', () => {
   let server: any;
