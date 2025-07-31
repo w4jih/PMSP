@@ -2,64 +2,54 @@ pipeline {
     agent any
 
     tools {
-        nodejs "NodeJS_20"   // Must match the NodeJS installation name in Jenkins
+        nodejs "NodeJS_20"   // Optional, needed only if you lint/test outside Docker
     }
-    
+
+    environment {
+        COMPOSE_PROJECT_NAME = "psmp"   // Optional, helps namespace Docker resources
+    }
 
     stages {
         stage('Checkout') {
             steps {
-                echo 'Cloning Repository...'
+                echo '📥 Cloning Repository...'
                 git branch: 'main', url: 'https://github.com/w4jih/PMSP.git'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Docker Compose Build') {
             steps {
-                echo 'Installing npm packages...'
-                bat 'npm install'
+                echo '🐳 Building Docker images...'
+                bat 'docker compose down -v'
+                bat 'docker compose up --build -d'
             }
         }
 
-        stage('Build') {
+        stage('Run Tests Inside Container') {
             steps {
-                echo 'Building Next.js backend...'
-                bat 'npm run build'
+                echo '🧪 Running tests inside backend container...'
+                bat 'docker exec psmp-backend-1 npm test'
             }
         }
 
-        stage('Prisma Generate') {
-            steps {
-                bat 'npx prisma generate'
-            }
-        }
+        // Optional: Linting or vulnerability scanning can go here
 
-        stage('Prisma Migrations') {
-            steps {
-                echo 'Running Prisma migrations...'
-                bat 'npx prisma migrate deploy'
-            }
-        }
-        stage('Seed Database') {
-            steps {
-                bat 'npm run seed'
-            }
-        }
-
-        stage('Tests') {
-            steps {
-                echo 'Running tests...'
-                bat 'npm test'
-            }
-        }
+        // Optional: Seed DB if not already done inside your container
+        // stage('Seed Database') {
+        //     steps {
+        //         bat 'docker exec psmp-backend-1 npm run seed'
+        //     }
+        // }
     }
 
     post {
         success {
-            echo 'Build Successful!'
+            echo '✅ Build & Deployment Successful!'
         }
         failure {
-            echo 'Build Failed!'
+            echo '❌ Build or Deployment Failed!'
+            // Optional: clean up containers on failure
+            bat 'docker compose down'
         }
     }
 }
