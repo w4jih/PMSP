@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        COMPOSE_PROJECT_NAME = "psmp"   // Optional, helps namespace Docker resources
+        COMPOSE_PROJECT_NAME = "psmp"    // Optional, helps namespace Docker resources
     }
 
     stages {
