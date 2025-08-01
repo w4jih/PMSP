@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         POSTGRES_USER = 'postgres'
-        POSTGRES_PASSWORD = 'glace 123'
+        POSTGRES_PASSWORD = "glace 123"
         POSTGRES_DB = 'mydb'
         DATABASE_URL = 'postgresql://postgres:glace 123@localhost:5432/mydb'
     }
