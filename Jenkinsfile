@@ -1,50 +1,55 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs "NodeJS_20"   // Optional, needed only if you lint/test outside Docker
+    }
+
     environment {
-        POSTGRES_USER = 'postgres'
-        POSTGRES_PASSWORD = 'glace' + ' 123'
-        POSTGRES_DB = 'mydb'
-        DATABASE_URL = 'postgresql://postgres:glace%20123@localhost:5432/mydb'
+        COMPOSE_PROJECT_NAME = "psmp"    // Optional, helps namespace Docker resources
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                echo '📥 Cloning Repository...'
+                git branch: 'main', url: 'https://github.com/w4jih/PMSP.git'
             }
         }
 
-        stage('Start PostgreSQL') {
+        stage('Docker Compose Build') {
             steps {
-                script {
-                    docker.image('postgres:15').withRun("-e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_PASSWORD='${POSTGRES_PASSWORD}' -e POSTGRES_DB=${POSTGRES_DB} -p 5432:5432") { postgres ->
-                        // Wait for PostgreSQL to be ready
-                        sh 'sleep 15'
-                    }
-                }
+                echo '🐳 Building Docker images...'
+                bat 'docker compose down -v'
+                bat 'docker compose up --build -d'
             }
         }
 
-        stage('Setup Node.js') {
+        stage('Run Tests Inside Container') {
             steps {
-                sh 'curl -fsSL https://deb.nodesource.com/setup_20.x | bash -'
-                sh 'apt-get install -y nodejs'
-                sh 'npm ci'
+                echo '🧪 Running tests inside backend container...'
+                bat 'docker exec psmp-backend-1 npm test'
             }
         }
 
-        stage('Prisma Generate & Migrate') {
-            steps {
-                sh 'npx prisma generate'
-                sh 'npx prisma migrate deploy'
-            }
-        }
+        // Optional: Linting or vulnerability scanning can go here
 
-        stage('Run Tests') {
-            steps {
-                sh 'npm test'
-            }
+        // Optional: Seed DB if not already done inside your container
+        // stage('Seed Database') {
+        //     steps {
+        //         bat 'docker exec psmp-backend-1 npm run seed'
+        //     }
+        // }
+    }
+
+    post {
+        success {
+            echo '✅ Build & Deployment Successful!'
+        }
+        failure {
+            echo '❌ Build or Deployment Failed!'
+            // Optional: clean up containers on failure
+            bat 'docker compose down'
         }
     }
 }
