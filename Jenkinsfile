@@ -20,7 +20,7 @@ pipeline {
                 script {
                     bat 'docker compose down'
                     bat 'docker compose up -d db'
-                    bat 'timeout /t 15'
+                    bat 'ping -n 15 127.0.0.1 > nul'
                 }
             }
         }
