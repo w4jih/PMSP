@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools { 
+        nodejs "NodeJS_20"
+    }
+
     environment {
         POSTGRES_USER = 'postgres'
         POSTGRES_PASSWORD = 'glace 123'
@@ -25,10 +29,8 @@ pipeline {
             }
         }
 
-        stage('Setup Node.js') {
+        stage('Install Dependencies') {
             steps {
-                bat 'curl -fsSL https://deb.nodesource.com/setup_20.x | bash -'
-                bat 'apt-get install -y nodejs'
                 bat 'npm ci'
             }
         }
