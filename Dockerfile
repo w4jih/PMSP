@@ -20,14 +20,17 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Définir l'argument pour passer depuis Jenkins
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+
 # Copier uniquement ce qui est nécessaire
 COPY --from=builder /app ./
 
 # Définir les variables d'environnement
 ENV NODE_ENV=production
-ENV DATABASE_URL=${DATABASE_URL}
 
-# Exposer le port (à adapter si nécessaire)
+# Exposer le port
 EXPOSE 3000
 
 # Démarrer l'application

@@ -10,7 +10,7 @@ pipeline {
         POSTGRES_PASSWORD = 'glace 123'
         POSTGRES_DB = 'mydb'
         DATABASE_URL = 'postgresql://postgres:glace 123@localhost:5433/mydb'
-        DOCKER_IMAGE = 'w4jih/pmsp-app'   // <-- Change avec ton Docker Hub repo
+        DOCKER_IMAGE = 'w4jih/pmsp-app'
         DOCKER_TAG = 'latest'
     }
 
@@ -53,7 +53,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 bat """
-                    docker build -t %DOCKER_IMAGE%:%DOCKER_TAG% .
+                    docker build ^
+                    --build-arg DATABASE_URL=%DATABASE_URL% ^
+                    -t %DOCKER_IMAGE%:%DOCKER_TAG% .
                 """
             }
         }
@@ -72,19 +74,11 @@ pipeline {
 
         stage('Deploy to Server') {
             steps {
-                // Si tu déploies sur le même serveur :
                 bat """
                     docker compose down
                     docker pull %DOCKER_IMAGE%:%DOCKER_TAG%
                     docker compose up -d
                 """
-                
-                // Si déploiement SSH vers un autre serveur :
-                // sshPublisher(publishers: [
-                //     sshPublisherDesc(configName: 'prod-server', transfers: [
-                //         sshTransfer(execCommand: "docker pull %DOCKER_IMAGE%:%DOCKER_TAG% && docker compose up -d", remoteDirectory: '')
-                //     ])
-                // ])
             }
         }
     }
