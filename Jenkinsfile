@@ -1,54 +1,54 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs "NodeJS_20"   // Optional, needed only if you lint/test outside Docker
-    }
-
     environment {
-        COMPOSE_PROJECT_NAME = "psmp"    // Optional, helps namespace Docker resources
+        POSTGRES_USER = 'postgres'
+        POSTGRES_PASSWORD = 'glace 123'
+        POSTGRES_DB = 'mydb'
+        DATABASE_URL = 'postgresql://postgres:glace 123@localhost:5433/mydb'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo '📥 Cloning Repository...'
-                git branch: 'main', url: 'https://github.com/w4jih/PMSP.git'
+                checkout scm
             }
         }
 
-        stage('Docker Compose Build') {
+        stage('Start PostgreSQL with Docker Compose') {
             steps {
-                echo '🐳 Building Docker images...'
-                bat 'docker compose down -v'
-                bat 'docker compose up --build -d'
+                script {
+                    bat 'docker compose down'
+                    bat 'docker compose up -d db'
+                    bat 'timeout /t 15'
+                }
             }
         }
 
-        stage('Run Tests Inside Container') {
+        stage('Setup Node.js') {
             steps {
-                echo '🧪 Running tests inside backend container...'
-                bat 'docker exec psmp-backend-1 npm test'
+                bat 'curl -fsSL https://deb.nodesource.com/setup_20.x | bash -'
+                bat 'apt-get install -y nodejs'
+                bat 'npm ci'
             }
         }
 
-        // Optional: Linting or vulnerability scanning can go here
+        stage('Prisma Generate & Migrate') {
+            steps {
+                bat 'npx prisma generate'
+                bat 'npx prisma migrate deploy'
+            }
+        }
 
-        // Optional: Seed DB if not already done inside your container
-        // stage('Seed Database') {
-        //     steps {
-        //         bat 'docker exec psmp-backend-1 npm run seed'
-        //     }
-        // }
+        stage('Run Tests') {
+            steps {
+                bat 'npm test'
+            }
+        }
     }
 
     post {
-        success {
-            echo '✅ Build & Deployment Successful!'
-        }
-        failure {
-            echo '❌ Build or Deployment Failed!'
-            // Optional: clean up containers on failure
+        always {
             bat 'docker compose down'
         }
     }
