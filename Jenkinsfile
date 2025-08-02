@@ -53,10 +53,10 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 bat """
-                    docker build ^
-                    --build-arg DATABASE_URL=%DATABASE_URL% ^
-                    -t %DOCKER_IMAGE%:%DOCKER_TAG% .
-                """
+                docker build ^
+            --build-arg DATABASE_URL="postgresql://postgres:glace 123@localhost:5433/mydb" ^
+            -t %DOCKER_IMAGE%:%DOCKER_TAG% .
+        """
             }
         }
 
