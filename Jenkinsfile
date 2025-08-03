@@ -60,7 +60,7 @@ pipeline {
 
     options {
         timestamps()
-        ansiColor('xterm')
+        
     }
 
     tools { nodejs 'NodeJS_20' }
