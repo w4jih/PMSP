@@ -17,6 +17,17 @@ pipeline {
             }
         }
 
+        stage('Generate .env file') {
+            steps {
+                echo '📝 Generating .env file from Jenkins global environment variables...'
+                writeFile file: '.env', text:""" 
+                DATABASE_URL=${env.DATABASE_URL}
+                JWT_SECRET=${env.JWT_SECRET}
+                ORS_API_KEY=${env.ORS_API_KEY}
+                STRIPE_SECRET_KEY=${env.STRIPE_SECRET_KEY}
+                STRIPE_PUBLISHABLE_KEY=${env.STRIPE_PUBLISHABLE_KEY}
+                """}
+
         stage('Docker Compose Build') {
             steps {
                 echo '🐳 Building Docker images...'
