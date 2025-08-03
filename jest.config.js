@@ -10,5 +10,6 @@ module.exports = {
   },
   preset: 'ts-jest',
   
-  setupFilesAfterEnv: ['C:/Users/moham/Desktop/postgres_connect/psmp/jest.setup.ts'],
+  //setupFilesAfterEnv: ['C:/Users/moham/Desktop/postgres_connect/psmp/jest.setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 };
