@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     tools {
-        nodejs "NodeJS_20"   // Optional, needed only if you lint/test outside Docker
+        nodejs "NodeJS_20"
     }
 
     environment {
-        COMPOSE_PROJECT_NAME = "psmp"    // Optional, helps namespace Docker resources
+        COMPOSE_PROJECT_NAME = "psmp"
     }
 
     stages {
@@ -20,13 +20,15 @@ pipeline {
         stage('Generate .env file') {
             steps {
                 echo '📝 Generating .env file from Jenkins global environment variables...'
-                writeFile file: '.env', text:""" 
-                DATABASE_URL=${env.DATABASE_URL}
-                JWT_SECRET=${env.JWT_SECRET}
-                ORS_API_KEY=${env.ORS_API_KEY}
-                STRIPE_SECRET_KEY=${env.STRIPE_SECRET_KEY}
-                STRIPE_PUBLISHABLE_KEY=${env.STRIPE_PUBLISHABLE_KEY}
-                """}}
+                writeFile file: '.env', text: """
+DATABASE_URL=${env.DATABASE_URL}
+JWT_SECRET=${env.JWT_SECRET}
+ORS_API_KEY=${env.ORS_API_KEY}
+STRIPE_SECRET_KEY=${env.STRIPE_SECRET_KEY}
+STRIPE_PUBLISHABLE_KEY=${env.STRIPE_PUBLISHABLE_KEY}
+"""
+            }
+        }
 
         stage('Docker Compose Build') {
             steps {
@@ -42,15 +44,6 @@ pipeline {
                 bat 'docker exec psmp-backend-1 npm test'
             }
         }
-
-        // Optional: Linting or vulnerability scanning can go here
-
-        // Optional: Seed DB if not already done inside your container
-        // stage('Seed Database') {
-        //     steps {
-        //         bat 'docker exec psmp-backend-1 npm run seed'
-        //     }
-        // }
     }
 
     post {
@@ -59,7 +52,6 @@ pipeline {
         }
         failure {
             echo '❌ Build or Deployment Failed!'
-            // Optional: clean up containers on failure
             bat 'docker compose down'
         }
     }
