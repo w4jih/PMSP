@@ -26,7 +26,7 @@ pipeline {
                 ORS_API_KEY=${env.ORS_API_KEY}
                 STRIPE_SECRET_KEY=${env.STRIPE_SECRET_KEY}
                 STRIPE_PUBLISHABLE_KEY=${env.STRIPE_PUBLISHABLE_KEY}
-                """}
+                """}}
 
         stage('Docker Compose Build') {
             steps {
