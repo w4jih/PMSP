@@ -17,19 +17,23 @@ pipeline {
             }
         }
 
-        stage('Generate .env file') {
-            steps {
-                echo '📝 Generating .env file from Jenkins global environment variables...'
-                writeFile file: '.env', text: """
-DATABASE_URL=${env.DATABASE_URL}
-JWT_SECRET=${env.JWT_SECRET}
-ORS_API_KEY=${env.ORS_API_KEY}
-STRIPE_SECRET_KEY=${env.STRIPE_SECRET_KEY}
-STRIPE_PUBLISHABLE_KEY=${env.STRIPE_PUBLISHABLE_KEY}
-"""
-            }
-        }
+    stage('Generate .env file') {
+        steps {
+                echo '📝 Generating .env file from Jenkins global environment variables…'
 
+        bat """
+                REM --- create the .env file ---
+                echo DATABASE_URL=%DATABASE_URL%            >  .env
+                echo JWT_SECRET=%JWT_SECRET%               >> .env
+                echo ORS_API_KEY=%ORS_API_KEY%             >> .env
+                echo STRIPE_SECRET_KEY=%STRIPE_SECRET_KEY% >> .env
+                echo STRIPE_PUBLISHABLE_KEY=%STRIPE_PUBLISHABLE_KEY% >> .env
+        """
+
+        echo '📂 Workspace after generating .env:'
+        bat 'dir /b'
+    }
+}
         stage('Docker Compose Build') {
             steps {
                 echo '🐳 Building Docker images...'
