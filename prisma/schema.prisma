@@ -27,6 +27,7 @@ model Conducteur{
   Cin     String
   email   String   @unique
   password String
+  kmprice Float
   vehicule   Vehicule? 
 }
 
