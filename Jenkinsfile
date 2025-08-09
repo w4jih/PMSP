@@ -92,9 +92,26 @@ pipeline {
    }
    }
 
+   stage('Docker Proxy Check') {
+  steps {
+    bat 'docker info | findstr /I proxy'
+  }
+  }
+
+
 
     stage('Ensure Minikube Running') {
       steps {
+        bat '''
+minikube delete || ver >NUL
+minikube start --driver=docker ^
+  --docker-env HTTP_PROXY= ^
+  --docker-env HTTPS_PROXY= ^
+  --docker-env NO_PROXY=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local ^
+  --docker-env no_proxy=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local ^
+  --wait=apiserver,system_pods,default_sa --wait-timeout=6m
+'''
+
         echo '🚀 Starting/ensuring Minikube…'
         bat 'minikube start --driver=docker'
         bat 'kubectl get nodes'
