@@ -37,7 +37,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const hashedPassword = bcrypt.hashSync(password, 10);
       await prisma.conducteur.update({
         where: { id },
-        data: { name, lastname, Cin, email, password: hashedPassword,kmprice },
+        data: { name, lastname, Cin, email, password: hashedPassword,kmprice:parseFloat(kmprice) },
       });
       return res.status(200).json({ message: `Conducteur with ID ${id} updated` });
     } catch (error) {
