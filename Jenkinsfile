@@ -84,6 +84,15 @@ pipeline {
       }
     }
 
+    stage('Preflight') {
+     steps {
+       bat 'where docker'
+       bat 'docker version'
+       bat 'docker ps'
+   }
+   }
+
+
     stage('Ensure Minikube Running') {
       steps {
         echo '🚀 Starting/ensuring Minikube…'
