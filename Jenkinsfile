@@ -157,11 +157,18 @@ kubectl -n %KUBE_NS% create secret generic backend-secrets ^
   }
 
   post {
-    success { echo '✅ Deploy to Minikube succeeded.' }
-    failure {
-      echo '❌ Deploy failed. Recent events:'
-      bat 'kubectl -n %KUBE_NS% get events --sort-by=.lastTimestamp | tail -n 50'
-    }
+  success { echo '✅ Deploy to Minikube succeeded.' }
+  failure {
+    echo '❌ Deploy failed. Recent diagnostics:'
+    powershell '''
+      Write-Host "---- minikube status"
+      minikube status
+      Write-Host "`n---- minikube logs --problems"
+      minikube logs --problems | Out-String | Write-Host
+      Write-Host "`n---- kubectl get pods -A"
+      kubectl get pods -A -o wide | Out-String | Write-Host
+    '''
   }
+}
 }
 
