@@ -173,7 +173,7 @@ minikube start --driver=docker ^
     stage('Wait for Rollout & Smoke Test') {
       steps {
         echo '⏳ Waiting for rollout…'
-        bat 'kubectl -n %KUBE_NS% rollout status deploy/backend --timeout=180s'
+        bat 'kubectl -n %KUBE_NS% rollout status deploy/backend --timeout=6m'
         echo '🔎 Pods:'
         bat 'kubectl -n %KUBE_NS% get pods -o wide'
         echo '🌐 Service URL (Minikube):'
