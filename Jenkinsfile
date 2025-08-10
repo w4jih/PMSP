@@ -171,34 +171,44 @@ minikube start --driver=docker ^
     }
 
     stage('Wait for Rollout & Smoke Test') {
-      steps {
-        echo '⏳ Waiting for rollout…'
-        bat 'kubectl -n %KUBE_NS% rollout status deploy/backend --timeout=6m'
-        echo '🔎 Pods:'
-        bat 'kubectl -n %KUBE_NS% get pods -o wide'
-        echo '🌐 Service URL (Minikube):'
-        echo '🌐 Service URL (NodePort) + Smoke Test'
-echo '🌐 Service URL (NodePort) + Smoke Test'
-powershell '''
-  $ip   = (minikube ip).Trim()
-  $port = (minikube kubectl -- -n $env:KUBE_NS get svc backend -o jsonpath="{.spec.ports[0].nodePort}")
-  if (-not $port) { $port = 30080 }   # fallback to YAML's nodePort
-  $url  = "http://$($ip):$port"       # <-- key change
+  steps {
+    echo '⏳ Waiting for rollout…'
+    bat 'kubectl -n %KUBE_NS% rollout status deploy/backend --timeout=6m'
 
-  Write-Host "Service URL: $url"
-  try {
-    $r = Invoke-WebRequest "$url/api/health" -UseBasicParsing -TimeoutSec 20
-    Write-Host "Health:" $r.StatusCode $r.Content
-    if ($r.StatusCode -ne 200) { throw "Health check failed" }
-  } catch {
-    Write-Error $_
-    exit 1
-  }
-'''
+    echo '🔎 Pods:'
+    bat 'kubectl -n %KUBE_NS% get pods -o wide'
 
+    echo '🧪 Smoke Test via kubectl port-forward'
+    powershell '''
+      $ErrorActionPreference = "Stop"
 
+      # Start background port-forward: localhost:3001 -> svc/backend:3000
+      $pf = Start-Process -FilePath "kubectl" `
+            -ArgumentList @("-n",$env:KUBE_NS,"port-forward","svc/backend","3001:3000","--address=127.0.0.1") `
+            -WindowStyle Hidden -PassThru
+
+      try {
+        # Wait until port-forward is ready (max ~20s)
+        $deadline = [DateTime]::UtcNow.AddSeconds(20)
+        do {
+          Start-Sleep -Seconds 1
+          $ok = (Test-NetConnection 127.0.0.1 -Port 3001).TcpTestSucceeded
+        } while (-not $ok -and [DateTime]::UtcNow -lt $deadline)
+
+        if (-not $ok) { throw "port-forward did not become ready in time" }
+
+        # Call health endpoint (bypass any system proxy)
+        $r = Invoke-WebRequest "http://127.0.0.1:3001/api/health" -UseBasicParsing -TimeoutSec 20 -Proxy $null
+        Write-Host "Health:" $($r.StatusCode) $($r.Content)
+        if ($r.StatusCode -ne 200) { throw "Health check failed" }
       }
-    }
+      finally {
+        if ($pf -and -not $pf.HasExited) { Stop-Process -Id $pf.Id -Force }
+      }
+    '''
+  }
+}
+
   }
 
   post {
