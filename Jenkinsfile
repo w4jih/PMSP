@@ -178,14 +178,14 @@ minikube start --driver=docker ^
         bat 'kubectl -n %KUBE_NS% get pods -o wide'
         echo '🌐 Service URL (Minikube):'
         echo '🌐 Service URL (NodePort) + Smoke Test'
+echo '🌐 Service URL (NodePort) + Smoke Test'
 powershell '''
   $ip   = (minikube ip).Trim()
-  # If you prefer not to hardcode, fetch the NodePort dynamically:
   $port = (minikube kubectl -- -n $env:KUBE_NS get svc backend -o jsonpath="{.spec.ports[0].nodePort}")
-  if (-not $port) { $port = 30080 }   # fallback to your YAML’s nodePort
-  $url  = "http://$ip:$port"
-  Write-Host "Service URL: $url"
+  if (-not $port) { $port = 30080 }   # fallback to YAML's nodePort
+  $url  = "http://$($ip):$port"       # <-- key change
 
+  Write-Host "Service URL: $url"
   try {
     $r = Invoke-WebRequest "$url/api/health" -UseBasicParsing -TimeoutSec 20
     Write-Host "Health:" $r.StatusCode $r.Content
@@ -195,6 +195,7 @@ powershell '''
     exit 1
   }
 '''
+
 
       }
     }
