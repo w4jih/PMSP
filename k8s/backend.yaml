@@ -11,10 +11,10 @@ spec:
     metadata:
       labels: { app: backend }
     spec:
-      # Run Prisma migrations before the app starts
       initContainers:
         - name: prisma-migrate
           image: psmp-backend:latest
+          imagePullPolicy: IfNotPresent   # <— important for Minikube
           command: ["sh", "-c", "npx prisma migrate deploy"]
           envFrom:
             - secretRef:
@@ -22,19 +22,34 @@ spec:
       containers:
         - name: backend
           image: psmp-backend:latest
+          imagePullPolicy: IfNotPresent   # <— important for Minikube
           ports:
             - containerPort: 3000
           envFrom:
             - secretRef:
                 name: backend-secrets
+          # Prefer a dedicated health endpoint; change if yours is different
           readinessProbe:
-            httpGet: { path: "/", port: 3000 }
-            initialDelaySeconds: 10
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 20
             periodSeconds: 5
+            failureThreshold: 10
           livenessProbe:
-            httpGet: { path: "/", port: 3000 }
-            initialDelaySeconds: 30
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 45
             periodSeconds: 10
+            failureThreshold: 5
+          # (Optional) if your app needs time to start compiling
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            failureThreshold: 30
+            periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
@@ -44,7 +59,7 @@ metadata:
 spec:
   selector:
     app: backend
-  type: NodePort          # For Minikube/dev
+  type: NodePort
   ports:
     - port: 3000
       targetPort: 3000
