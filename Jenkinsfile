@@ -135,22 +135,31 @@ minikube start --driver=docker ^
     }
 
     stage('Create Namespace & Secrets') {
-      steps {
-        echo '🔐 Creating namespace & secrets…'
-        bat 'kubectl get ns %KUBE_NS% || kubectl create ns %KUBE_NS%'
-        // Recreate secrets each run to keep them fresh
-        bat '''
-kubectl -n %KUBE_NS% delete secret backend-secrets --ignore-not-found
-kubectl -n %KUBE_NS% create secret generic backend-secrets ^
-  --from-literal=POSTGRES_PASSWORD="%POSTGRES_PASSWORD%" ^
-  --from-literal=JWT_SECRET="%JWT_SECRET%" ^
-  --from-literal=ORS_API_KEY="%ORS_API_KEY%" ^
-  --from-literal=STRIPE_SECRET_KEY="%STRIPE_SECRET_KEY%" ^
-  --from-literal=STRIPE_PUBLISHABLE_KEY="%STRIPE_PUBLISHABLE_KEY%" ^
-  --from-literal=DATABASE_URL="postgresql://postgres:%POSTGRES_PASSWORD%@postgres.%KUBE_NS%.svc.cluster.local:5432/mydb?schema=public"
-'''
-      }
-    }
+  steps {
+    echo '🔐 Creating namespace & secrets…'
+    bat 'kubectl get ns %KUBE_NS% || kubectl create ns %KUBE_NS%'
+    powershell '''
+      $ns = $env:KUBE_NS
+      $pw = $env:POSTGRES_PASSWORD
+      if ([string]::IsNullOrEmpty($pw)) { Write-Error "POSTGRES_PASSWORD is empty"; exit 1 }
+
+      # URL-encode just the password part for the URI
+      $pwEnc = [System.Uri]::EscapeDataString($pw)
+
+      $dbUrl = "postgresql://postgres:${pwEnc}@postgres.$ns.svc.cluster.local:5432/mydb?schema=public"
+
+      kubectl -n $ns delete secret backend-secrets --ignore-not-found | Out-Null
+      kubectl -n $ns create secret generic backend-secrets `
+        --from-literal=POSTGRES_PASSWORD="$pw" `
+        --from-literal=JWT_SECRET="$env:JWT_SECRET" `
+        --from-literal=ORS_API_KEY="$env:ORS_API_KEY" `
+        --from-literal=STRIPE_SECRET_KEY="$env:STRIPE_SECRET_KEY" `
+        --from-literal=STRIPE_PUBLISHABLE_KEY="$env:STRIPE_PUBLISHABLE_KEY" `
+        --from-literal=DATABASE_URL="$dbUrl"
+    '''
+  }
+}
+
 
     stage('Apply Manifests') {
       steps {
