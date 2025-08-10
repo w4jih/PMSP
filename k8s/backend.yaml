@@ -12,6 +12,9 @@ spec:
       labels: { app: backend }
     spec:
       initContainers:
+        - name: wait-for-postgres
+          image: alpine:3.20
+          command: ["sh","-c","until nc -z postgres.psmp.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done"]
         - name: prisma-migrate
           image: psmp-backend:latest
           imagePullPolicy: IfNotPresent   # <— important for Minikube
