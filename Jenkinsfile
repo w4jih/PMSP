@@ -53,10 +53,10 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 bat """
-                docker build ^
-            --build-arg DATABASE_URL="postgresql://postgres:glace 123@localhost:5433/mydb" ^
-            -t %DOCKER_IMAGE%:%DOCKER_TAG% .
-        """
+                    docker build ^
+                        --build-arg DATABASE_URL="postgresql://postgres:glace 123@localhost:5433/mydb" ^
+                        -t %DOCKER_IMAGE%:%DOCKER_TAG% .
+                """
             }
         }
 
@@ -72,13 +72,24 @@ pipeline {
             }
         }
 
-        stage('Deploy to Server') {
+        stage('Test Kubernetes Connection') {
             steps {
-                bat """
-                    docker compose down
-                    docker pull %DOCKER_IMAGE%:%DOCKER_TAG%
-                    docker compose up -d
-                """
+                withCredentials([file(credentialsId: 'kubeconfig-cred', variable: 'KUBECONFIG')]) {
+                    bat 'kubectl get nodes'
+                    bat 'kubectl get pods -A'
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig-cred', variable: 'KUBECONFIG')]) {
+                    bat """
+                        kubectl apply -f postgres-secret.yaml
+                        kubectl apply -f pmsp-app-deployment.yaml
+                        kubectl apply -f pmsp-app-service.yaml
+                    """
+                }
             }
         }
     }
