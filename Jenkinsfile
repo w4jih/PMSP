@@ -99,7 +99,7 @@ pipeline {
   }
 
 
-
+/*
     stage('Ensure Minikube Running') {
       steps {
         bat '''
@@ -117,6 +117,31 @@ minikube start --driver=docker ^
         bat 'kubectl get nodes'
       }
     }
+*/
+stage('Ensure Minikube Running') {
+  options { timeout(time: 10, unit: 'MINUTES') } // safety net
+  steps {
+    echo '🚀 Ensuring Minikube is up (Docker driver)…'
+    // Pull kicbase once so "Extraction..." is instant
+    bat 'docker image inspect gcr.io/k8s-minikube/kicbase:v0.0.47 || docker pull gcr.io/k8s-minikube/kicbase:v0.0.47'
+
+    // Start only if not already running
+    bat '''
+for /f "tokens=2 delims=: " %%A in ('minikube status ^| findstr /I "host:"') do set STATE=%%A
+if /I NOT "%STATE%"=="Running" (
+  echo Starting minikube...
+  minikube start --driver=docker ^
+    --wait=apiserver,system_pods,default_sa ^
+    --wait-timeout=8m ^
+    --alsologtostderr -v=3
+) else (
+  echo Minikube already running.
+)
+'''
+    bat 'minikube status'
+    bat 'kubectl get nodes'
+  }
+}
 
     stage('Build Docker Image') {
       steps {
