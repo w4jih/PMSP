@@ -62,17 +62,15 @@ pipeline {
 
         stage('Start Minikube') {
             steps {
-                sh '''
+                bat '''
                     echo "=== Starting Minikube ==="
                     mkdir -p $(dirname "$KUBECONFIG")
                     
-                    # Start Minikube with Docker driver
                     minikube start \
                         --driver=docker \
                         --docker-env HTTP_PROXY=$HTTP_PROXY \
                         --docker-env HTTPS_PROXY=$HTTPS_PROXY
 
-                    # Copy kubeconfig from Minikube
                     minikube kubectl -- config view --raw > "$KUBECONFIG"
                 '''
             }
@@ -80,7 +78,7 @@ pipeline {
 
         stage('Test Kubectl') {
             steps {
-                sh '''
+                bat '''
                     echo "=== Testing kubectl ==="
                     kubectl get nodes
                     kubectl get pods -A
@@ -103,7 +101,7 @@ pipeline {
 
     post {
         always {
-            sh 'minikube stop || true'
+            bat 'minikube stop || true'
         }
     }
 }
