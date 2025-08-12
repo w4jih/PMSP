@@ -60,24 +60,31 @@ pipeline {
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Start Minikube') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-cred', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat """
-                        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
-                        docker push %DOCKER_IMAGE%:%DOCKER_TAG%
-                        docker logout
-                    """
-                }
+                sh '''
+                    echo "=== Starting Minikube ==="
+                    mkdir -p $(dirname "$KUBECONFIG")
+                    
+                    # Start Minikube with Docker driver
+                    minikube start \
+                        --driver=docker \
+                        --docker-env HTTP_PROXY=$HTTP_PROXY \
+                        --docker-env HTTPS_PROXY=$HTTPS_PROXY
+
+                    # Copy kubeconfig from Minikube
+                    minikube kubectl -- config view --raw > "$KUBECONFIG"
+                '''
             }
         }
 
-        stage('Test Kubernetes Connection') {
+        stage('Test Kubectl') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig-cred', variable: 'KUBECONFIG')]) {
-                    bat 'kubectl get nodes'
-                    bat 'kubectl get pods -A'
-                }
+                sh '''
+                    echo "=== Testing kubectl ==="
+                    kubectl get nodes
+                    kubectl get pods -A
+                '''
             }
         }
 
@@ -96,7 +103,7 @@ pipeline {
 
     post {
         always {
-            bat 'docker compose down'
+            sh 'minikube stop || true'
         }
     }
 }
