@@ -81,8 +81,8 @@ pipeline {
 
         stage('Test kubectl') {
             steps {
+                withCredentials([file(credentialsId: 'kubeconfig-cred', variable: 'KUBECONFIG')]) {
                 bat '''
-                set KUBECONFIG=C:\\Users\\jenkins\\.kube\\config
                 kubectl get nodes
                 '''
             }
