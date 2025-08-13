@@ -61,27 +61,29 @@ pipeline {
         }
 
         stage('Start Minikube') {
+    steps {
+        bat """
+            echo Deleting existing Minikube cluster...
+            minikube delete
+
+            echo Starting Minikube without proxy...
+            if not exist "%USERPROFILE%\\.kube" mkdir "%USERPROFILE%\\.kube"
+            set KUBECONFIG=%USERPROFILE%\\.kube\\config
+
+            minikube start --driver=docker --no-vtx-check
+
+            echo Exporting kubeconfig...
+            minikube kubectl -- config view --raw > "%USERPROFILE%\\.kube\\config"
+        """
+    }
+}
+
+
+        stage('Test kubectl') {
             steps {
                 bat '''
-                    echo "=== Starting Minikube ==="
-                    mkdir -p $(dirname "$KUBECONFIG")
-                    
-                    minikube start \
-                        --driver=docker \
-                        --docker-env HTTP_PROXY=$HTTP_PROXY \
-                        --docker-env HTTPS_PROXY=$HTTPS_PROXY
-
-                    minikube kubectl -- config view --raw > "$KUBECONFIG"
-                '''
-            }
-        }
-
-        stage('Test Kubectl') {
-            steps {
-                bat '''
-                    echo "=== Testing kubectl ==="
-                    kubectl get nodes
-                    kubectl get pods -A
+                set KUBECONFIG=C:\\Users\\jenkins\\.kube\\config
+                kubectl get nodes
                 '''
             }
         }
