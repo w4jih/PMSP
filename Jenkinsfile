@@ -67,15 +67,22 @@ pipeline {
             minikube delete || true
             echo Starting Minikube...
             minikube start --driver=docker
+
+            REM Création du dossier si inexistant
             mkdir C:\\Users\\jenkins\\.kube || true
-            minikube kubectl -- config view --raw > %KUBECONFIG%
+
+            REM Export du kubeconfig généré par minikube vers ce dossier
+            minikube kubectl -- config view --raw > C:\\Users\\jenkins\\.kube\\config
+
+            echo ======= kubeconfig content =======
+            type C:\\Users\\jenkins\\.kube\\config
         """
     }
 }
 
-        stage('Test kubectl') {
+       stage('Test kubectl') {
     steps {
-        bat 'kubectl get nodes --kubeconfig=%KUBECONFIG%'
+        bat 'kubectl get nodes --kubeconfig=C:\\Users\\jenkins\\.kube\\config'
     }
 }
         stage('Deploy to Kubernetes') {
