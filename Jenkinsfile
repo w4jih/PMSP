@@ -62,23 +62,22 @@ pipeline {
         }
 
         stage('Start Minikube') {
-            steps {
-                bat """
-                    minikube delete || true
-                    echo Starting Minikube...
-                    minikube start --driver=docker
-                    mkdir C:\\Users\\jenkins\\.kube || true
-                    minikube kubectl -- config view --raw > %KUBECONFIG%
-                """
-            }
-        }
+    steps {
+        bat """
+            minikube delete || true
+            echo Starting Minikube...
+            minikube start --driver=docker
+            mkdir C:\\Users\\jenkins\\.kube || true
+            minikube kubectl -- config view --raw > %KUBECONFIG%
+        """
+    }
+}
 
         stage('Test kubectl') {
-            steps {
-                bat 'kubectl get nodes'
-            }
-        }
-
+    steps {
+        bat 'kubectl get nodes --kubeconfig=%KUBECONFIG%'
+    }
+}
         stage('Deploy to Kubernetes') {
             steps {
                 bat """
