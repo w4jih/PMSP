@@ -82,7 +82,6 @@ pipeline {
         stage('Test kubectl') {
             steps {
                 bat '''
-                set KUBECONFIG=C:\WINDOWS\system32\config\systemprofile\.kube\config
                 kubectl get nodes
                 '''
             }
