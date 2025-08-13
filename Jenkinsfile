@@ -83,9 +83,9 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig-cred', variable: 'KUBECONFIG')]) {
                 bat '''
+                set KUBECONFIG=C:..\\config
                 kubectl get nodes
                 '''
-            }
             }
         }
 
