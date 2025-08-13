@@ -12,6 +12,7 @@ pipeline {
         DATABASE_URL = 'postgresql://postgres:glace 123@localhost:5433/mydb'
         DOCKER_IMAGE = 'w4jih/pmsp-app'
         DOCKER_TAG = 'latest'
+        KUBECONFIG = "C:\\Users\\jenkins\\.kube\\config"
     }
 
     stages {
@@ -61,50 +62,37 @@ pipeline {
         }
 
         stage('Start Minikube') {
-    steps {
-        bat """
-            echo Deleting existing Minikube cluster...
-            minikube delete
-
-            echo Starting Minikube without proxy...
-            if not exist "%USERPROFILE%\\.kube" mkdir "%USERPROFILE%\\.kube"
-            set KUBECONFIG=%USERPROFILE%\\.kube\\config
-
-            minikube start --driver=docker --no-vtx-check
-
-            echo Exporting kubeconfig...
-            minikube kubectl -- config view --raw > "%USERPROFILE%\\.kube\\config"
-        """
-    }
-}
-
+            steps {
+                bat """
+                    minikube delete || true
+                    echo Starting Minikube...
+                    minikube start --driver=docker
+                    mkdir C:\\Users\\jenkins\\.kube || true
+                    minikube kubectl -- config view --raw > %KUBECONFIG%
+                """
+            }
+        }
 
         stage('Test kubectl') {
-    steps {
-        withCredentials([file(credentialsId: 'kubeconfig-cred', variable: 'KUBECONFIG')]) {
-            bat """
-                kubectl get nodes
-            """
+            steps {
+                bat 'kubectl get nodes'
+            }
         }
-    }
-}
-
 
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig-cred', variable: 'KUBECONFIG')]) {
-                    bat """
-                        kubectl apply -f postgres-secret.yaml
-                        kubectl apply -f pmsp-app-deployment.yaml
-                        kubectl apply -f pmsp-app-service.yaml
-                    """
-                }
+                bat """
+                    kubectl apply -f postgres-secret.yaml
+                    kubectl apply -f pmsp-app-deployment.yaml
+                    kubectl apply -f pmsp-app-service.yaml
+                """
             }
         }
     }
 
     post {
         always {
+            bat 'docker compose down'
             bat 'minikube stop || true'
         }
     }
