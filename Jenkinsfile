@@ -82,6 +82,7 @@ pipeline {
         stage('Test kubectl') {
             steps {
                 bat '''
+                set KUBECONFIG=C:\\Users\\jenkins\\.kube\\config
                 kubectl get nodes
                 '''
             }
