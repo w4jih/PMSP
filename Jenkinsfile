@@ -87,6 +87,7 @@ pipeline {
                 kubectl get nodes
                 '''
             }
+            }
         }
 
         stage('Deploy to Kubernetes') {
