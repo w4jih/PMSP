@@ -80,15 +80,15 @@ pipeline {
 
 
         stage('Test kubectl') {
-            steps {
-                withCredentials([file(credentialsId: 'kubeconfig-cred', variable: 'KUBECONFIG')]) {
-                bat '''
-                set KUBECONFIG=C:..\\config
+    steps {
+        withCredentials([file(credentialsId: 'kubeconfig-cred', variable: 'KUBECONFIG')]) {
+            bat """
                 kubectl get nodes
-                '''
-            }
-            }
+            """
         }
+    }
+}
+
 
         stage('Deploy to Kubernetes') {
             steps {
