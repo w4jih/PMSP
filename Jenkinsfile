@@ -89,9 +89,10 @@ pipeline {
         }
 
     
-        stage('Test kubectl') {
+        stage('Check Cluster') {
             steps {
-                bat 'kubectl get nodes --kubeconfig=%KUBECONFIG%'
+                bat 'kubectl config get-contexts'
+                bat 'kubectl get nodes'
             }
         }
         
