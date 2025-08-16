@@ -30,7 +30,7 @@ pipeline {
                 script {
                     bat 'docker compose down'
                     bat 'docker compose up -d db'
-                    bat 'ping -n 15 127.0.0.1 > nul' // Attendre 15 sec
+                    bat 'ping -n 15 127.0.0.1 > nul' // Attente 15s pour DB
                 }
             }
         }
@@ -68,18 +68,25 @@ pipeline {
             }
         }
 
-        /* === 7. Lancer Minikube === */
+        /* === 7. Nettoyage + Démarrage Minikube === */
         stage('Start Minikube') {
             steps {
                 bat """
-                    minikube delete || true
-                    echo Starting Minikube...
+                    REM Nettoyage complet Minikube
+                    minikube delete --all --purge
+
+                    REM Supprimer le conteneur minikube si existe
+                    for /f %%i in ('docker ps -a -q --filter "name=minikube"') do docker rm -f %%i
+
+                    REM Nettoyage volumes
+                    docker volume prune -f
+
+                    REM Démarrage du cluster
                     minikube start --driver=docker
+                    minikube status
 
-                    REM Créer le dossier kube si inexistant
-                    mkdir C:\\Users\\jenkins\\.kube || true
-
-                    REM Exporter la config Kubernetes
+                    REM Préparation du kubeconfig
+                    mkdir C:\\Users\\jenkins\\.kube 2>nul
                     minikube kubectl -- config view --raw > C:\\Users\\jenkins\\.kube\\config
 
                     echo ======= kubeconfig content =======
@@ -88,14 +95,15 @@ pipeline {
             }
         }
 
-    
+        /* === 8. Vérifier le cluster === */
         stage('Check Cluster') {
             steps {
-                bat 'kubectl config get-contexts'
-                bat 'kubectl get nodes'
+                bat 'kubectl config get-contexts --kubeconfig=%KUBECONFIG%'
+                bat 'kubectl get nodes --kubeconfig=%KUBECONFIG%'
             }
         }
-        
+
+        /* === 9. Déployer sur Kubernetes === */
         stage('Deploy to Kubernetes') {
             steps {
                 bat """
