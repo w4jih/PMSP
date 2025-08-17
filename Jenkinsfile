@@ -14,7 +14,7 @@ pipeline {
         stage('Start Minikube') {
             steps {
                 powershell """
-                minikube start -p ${env.MINIKUBE_PROFILE} --driver=docker
+                minikube start -p ${env.MINIKUBE_PROFILE} --driver=virtualbox
                 & minikube -p ${env.MINIKUBE_PROFILE} docker-env --shell powershell | Invoke-Expression
                 """
             }
@@ -61,7 +61,22 @@ spec:
             steps {
                 powershell """
                 kubectl apply -f .\\deployment.yaml
+                """
+            }
+        }
+
+        stage('Wait for Pod Ready') {
+            steps {
+                powershell """
+                kubectl wait --for=condition=Ready pod -l app=${env.APP_NAME} --timeout=120s
                 kubectl get pods
+                """
+            }
+        }
+
+        stage('Expose Service') {
+            steps {
+                powershell """
                 kubectl expose deployment ${env.APP_NAME} --type=NodePort --port=8080
                 minikube service ${env.APP_NAME} --url
                 """
