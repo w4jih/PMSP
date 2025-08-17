@@ -20,39 +20,12 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Docker Image in Minikube') {
             steps {
                 powershell """
+                # Build the image inside Minikube's Docker
                 docker build -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} ${env.DOCKERFILE_PATH}
                 docker images
-                """
-            }
-        }
-
-        stage('Create Kubernetes Deployment YAML') {
-            steps {
-                powershell """
-                @\"
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ${env.APP_NAME}
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: ${env.APP_NAME}
-  template:
-    metadata:
-      labels:
-        app: ${env.APP_NAME}
-    spec:
-      containers:
-      - name: ${env.APP_NAME}-container
-        image: ${env.IMAGE_NAME}:${env.IMAGE_TAG}
-        ports:
-        - containerPort: 8080
-"@ | Out-File -FilePath .\\deployment.yaml -Encoding UTF8
                 """
             }
         }
@@ -60,33 +33,20 @@ spec:
         stage('Deploy to Kubernetes') {
             steps {
                 powershell """
-                kubectl apply -f .\\deployment.yaml
-                """
-            }
-        }
-
-        stage('Wait for Pod Ready') {
-            steps {
-                powershell """
-                kubectl wait --for=condition=Ready pod -l app=${env.APP_NAME} --timeout=120s
-                kubectl get pods
-                """
-            }
-        }
-
-        stage('Expose Service') {
-            steps {
-                powershell """
-                # Supprime le service existant si nécessaire
+                # Supprime l'ancien déploiement si existant
+                kubectl delete deployment ${env.APP_NAME} --ignore-not-found
                 kubectl delete service ${env.APP_NAME} --ignore-not-found
+
+                # Crée le déploiement avec l'image locale
+                kubectl create deployment ${env.APP_NAME} --image=${env.IMAGE_NAME}:${env.IMAGE_TAG}
+
+                # Attendre que le pod soit prêt
+                kubectl wait --for=condition=Ready pod -l app=${env.APP_NAME} --timeout=120s
 
                 # Expose le service
                 kubectl expose deployment ${env.APP_NAME} --type=NodePort --port=8080
 
-                # Attendre que le service soit prêt (optionnel)
-                Start-Sleep -Seconds 5
-
-                # Récupérer l'URL du service
+                # Affiche l'URL du service
                 minikube service ${env.APP_NAME} --url
                 """
             }
