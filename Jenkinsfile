@@ -14,7 +14,7 @@ pipeline {
         stage('Start Minikube') {
             steps {
                 powershell """
-                minikube start -p ${env.MINIKUBE_PROFILE} --driver=virtualbox
+                minikube start -p ${env.MINIKUBE_PROFILE} --driver=docker
                 & minikube -p ${env.MINIKUBE_PROFILE} docker-env --shell powershell | Invoke-Expression
                 """
             }
@@ -77,7 +77,16 @@ spec:
         stage('Expose Service') {
             steps {
                 powershell """
+                # Supprime le service existant si nécessaire
+                kubectl delete service ${env.APP_NAME} --ignore-not-found
+
+                # Expose le service
                 kubectl expose deployment ${env.APP_NAME} --type=NodePort --port=8080
+
+                # Attendre que le service soit prêt (optionnel)
+                Start-Sleep -Seconds 5
+
+                # Récupérer l'URL du service
                 minikube service ${env.APP_NAME} --url
                 """
             }
