@@ -14,7 +14,7 @@ pipeline {
         stage('Start Minikube') {
             steps {
                 powershell """
-                minikube start -p ${env.MINIKUBE_PROFILE} --driver=virtualbox
+                minikube start -p ${env.MINIKUBE_PROFILE} --driver=docker
                 & minikube -p ${env.MINIKUBE_PROFILE} docker-env --shell powershell | Invoke-Expression
                 """
             }
