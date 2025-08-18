@@ -6,6 +6,7 @@ pipeline {
   environment {
     IMAGE_LOCAL = 'w4jih/pmsp-app:latest'
     KUBE_NS     = 'psmp'
+    KUBECONFIG = "${WORKSPACE}/.kube/config"
     POSTGRES_PASSWORD = 'glace 123'
   }
 
@@ -33,15 +34,28 @@ pipeline {
     }
 
     stage('Ensure Minikube Running') {
-      steps {
+       steps {
         echo '🚀 Ensuring Minikube…'
         bat '''
-minikube delete || ver >NUL
-minikube start --driver=docker --wait=apiserver,system_pods,default_sa --wait-timeout=6m
-'''
-        bat 'kubectl get nodes'
-      }
+        echo === Resetting Minikube ===
+        minikube delete || ver >NUL
+
+        echo === Starting Minikube ===
+        minikube start --driver=docker --wait=apiserver,system_pods,default_sa --wait-timeout=6m
+
+        echo === Setting kubeconfig ===
+        if not exist %WORKSPACE%\\.kube mkdir %WORKSPACE%\\.kube
+        minikube kubectl -- config view --raw > %WORKSPACE%\\.kube\\config
+
+        echo === Minikube status ===
+        minikube status
+
+        echo === Checking nodes ===
+        kubectl get nodes --kubeconfig=%WORKSPACE%\\.kube\\config
+        '''
+        }
     }
+
 
     stage('Build Docker Image') {
       steps {
