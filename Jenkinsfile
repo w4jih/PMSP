@@ -359,4 +359,4 @@ helm upgrade --install monitoring prometheus-community/kube-prometheus-stack ^
     }
   }
 }
-
+}
