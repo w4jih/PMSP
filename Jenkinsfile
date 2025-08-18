@@ -2,61 +2,62 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "monimage"
-        IMAGE_TAG = "latest"
-        MINIKUBE_PROFILE = "minikube"
         APP_NAME = "monapp"
-        DOCKERFILE_PATH = "C:/Users/21655/Desktop/PMSP2/PMSP"
+        IMAGE_NAME = "monimage:latest"
+        DOCKER_TLS_VERIFY = ""
+        DOCKER_HOST = ""
+        DOCKER_CERT_PATH = ""
     }
 
     stages {
-
-        stage('Start Minikube') {
+        stage('Checkout') {
             steps {
-                powershell """
-                minikube start -p ${env.MINIKUBE_PROFILE} --driver=docker
-                & minikube -p ${env.MINIKUBE_PROFILE} docker-env --shell powershell | Invoke-Expression
-                """
+                git branch: 'main', url: 'https://github.com/w4jih/PMSP.git'
             }
         }
 
-        stage('Build Docker Image in Minikube') {
+        stage('Configure Docker with Minikube') {
             steps {
-                powershell """
-                # Build the image inside Minikube's Docker
-                docker build -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} ${env.DOCKERFILE_PATH}
-                docker images
-                """
+                powershell '''
+                    # Configure Docker to use Minikube's Docker daemon
+                    & minikube -p minikube docker-env --shell powershell | Invoke-Expression
+
+                    # Show Docker info to confirm
+                    docker ps
+                '''
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Build Docker Image') {
             steps {
-                powershell """
-                # Supprime l'ancien déploiement si existant
-                kubectl delete deployment ${env.APP_NAME} --ignore-not-found
-                kubectl delete service ${env.APP_NAME} --ignore-not-found
-
-                # Crée le déploiement avec l'image locale
-                kubectl create deployment ${env.APP_NAME} --image=${env.IMAGE_NAME}:${env.IMAGE_TAG}
-
-                # Attendre que le pod soit prêt
-                kubectl wait --for=condition=Ready pod -l app=${env.APP_NAME} --timeout=120s
-
-                # Expose le service
-                kubectl expose deployment ${env.APP_NAME} --type=NodePort --port=8080
-
-                # Affiche l'URL du service
-                minikube service ${env.APP_NAME} --url
-                """
+                powershell '''
+                    docker build -t ${env.IMAGE_NAME} .
+                    docker images
+                '''
             }
         }
 
-    }
+        stage('Deploy to Minikube') {
+            steps {
+                powershell '''
+                    # Delete old deployment if exists
+                    kubectl delete deployment ${env.APP_NAME} --ignore-not-found=true
 
-    post {
-        always {
-            echo "Pipeline terminée !"
+                    # Create new deployment with the fresh local image
+                    kubectl create deployment ${env.APP_NAME} --image=${env.IMAGE_NAME}
+
+                    # Expose the service on a NodePort (accessible via minikube service)
+                    kubectl expose deployment ${env.APP_NAME} --type=NodePort --port=8080
+                '''
+            }
+        }
+
+        stage('Get Service URL') {
+            steps {
+                powershell '''
+                    minikube service ${env.APP_NAME} --url
+                '''
+            }
         }
     }
 }
