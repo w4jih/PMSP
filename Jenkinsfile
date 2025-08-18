@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/w4jih/PMSP.git'
+                Checkout scm
             }
         }
 
