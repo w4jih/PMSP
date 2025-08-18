@@ -1,24 +1,3 @@
-/*
-pipeline {
-  agent any
-  options { timestamps() }
-  tools { nodejs 'NodeJS_20' }
-
-  environment {
-    IMAGE_LOCAL = 'psmp-backend:latest'
-    KUBE_NS = 'psmp'
-  }
-
-  stages {
-    ...
-  }
-
-  post {
-    ...
-  }
-}
-*/
-
 pipeline {
   agent any
   options { timestamps() }
@@ -57,11 +36,11 @@ pipeline {
         echo '🚀 Ensuring Minikube…'
         bat '''
 minikube delete || ver >NUL
-minikube start --driver=docker ^ 
-  --docker-env HTTP_PROXY= ^ 
-  --docker-env HTTPS_PROXY= ^ 
-  --docker-env NO_PROXY=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local ^ 
-  --docker-env no_proxy=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local ^ 
+minikube start --driver=docker ^
+  --docker-env HTTP_PROXY= ^
+  --docker-env HTTPS_PROXY= ^
+  --docker-env NO_PROXY=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local ^
+  --docker-env no_proxy=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local ^
   --wait=apiserver,system_pods,default_sa --wait-timeout=6m
 '''
         bat 'kubectl get nodes'
@@ -150,8 +129,6 @@ minikube start --driver=docker ^
       }
     }
 
-    /* ===== Monitoring stack: Prometheus Operator + Grafana + ServiceMonitor ===== */
-
     stage('Install/Upgrade Monitoring Stack') {
       steps {
         echo '📈 Ensuring kube-prometheus-stack is installed…'
@@ -162,7 +139,6 @@ helm upgrade --install monitoring prometheus-community/kube-prometheus-stack ^
   --namespace monitoring --create-namespace ^
   --set grafana.enabled=true
 '''
-
         bat 'kubectl -n monitoring get deploy,sts,po -o wide'
         bat 'kubectl -n monitoring rollout status deploy -l app.kubernetes.io/name=kube-prometheus-stack-operator --timeout=8m || ver>NUL'
         bat 'kubectl -n monitoring rollout status deploy -l app.kubernetes.io/name=prometheus-operator --timeout=8m'
