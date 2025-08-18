@@ -6,7 +6,7 @@ pipeline {
   environment {
     IMAGE_LOCAL = 'w4jih/pmsp-app:latest'
     KUBE_NS     = 'psmp'
-    KUBECONFIG = "${WORKSPACE}/.kube/config"
+    KUBECONFIG = "C:\Users\jenkins\.kube\config"
     POSTGRES_PASSWORD = 'glace 123'
   }
 
@@ -44,14 +44,14 @@ pipeline {
         minikube start --driver=docker --wait=apiserver,system_pods,default_sa --wait-timeout=6m
 
         echo === Setting kubeconfig ===
-        if not exist %WORKSPACE%\\.kube mkdir %WORKSPACE%\\.kube
-        minikube kubectl -- config view --raw > %WORKSPACE%\\.kube\\config
+        if not exist %KUBECONFIG% mkdir %KUBECONFIG%
+        minikube kubectl -- config view --raw > %KUBECONFIG%
 
         echo === Minikube status ===
         minikube status
 
         echo === Checking nodes ===
-        kubectl get nodes --kubeconfig=%WORKSPACE%\\.kube\\config
+        kubectl get nodes --kubeconfig=%KUBECONFIG%
         '''
         }
     }
