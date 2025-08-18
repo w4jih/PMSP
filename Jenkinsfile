@@ -37,8 +37,7 @@ pipeline {
         echo '🚀 Ensuring Minikube…'
         bat '''
 minikube delete || ver >NUL
-minikube start --driver=docker ^ 
-  --wait=apiserver,system_pods,default_sa --wait-timeout=6m
+minikube start --driver=docker --wait=apiserver,system_pods,default_sa --wait-timeout=6m
 '''
         bat 'kubectl get nodes'
       }
