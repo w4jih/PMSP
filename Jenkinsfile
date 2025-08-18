@@ -4,8 +4,9 @@ pipeline {
   tools { nodejs 'NodeJS_20' }
 
   environment {
-    IMAGE_LOCAL = 'psmp-backend:latest'
+    IMAGE_LOCAL = 'w4jih/pmsp-app:latest'
     KUBE_NS     = 'psmp'
+    POSTGRES_PASSWORD = 'glace 123'
   }
 
   stages {
@@ -98,7 +99,7 @@ minikube start --driver=docker ^
     stage('Wait for Rollout & Smoke Test') {
       steps {
         echo '⏳ Waiting for rollout…'
-        bat 'kubectl -n %KUBE_NS% rollout status deploy/backend --timeout=6m'
+        bat 'kubectl -n %KUBE_NS% rollout status deploy/pmsp-app --timeout=6m'
 
         echo '🔎 Pods:'
         bat 'kubectl -n %KUBE_NS% get pods -o wide'
