@@ -59,7 +59,7 @@ minikube start --driver=docker ^
       steps {
         echo '📦 Loading image into Minikube…'
         bat 'minikube image load %IMAGE_LOCAL%'
-        bat 'minikube image ls | findstr psmp-backend'
+        bat 'minikube image ls | findstr w4jih/pmsp-app'
       }
     }
 
