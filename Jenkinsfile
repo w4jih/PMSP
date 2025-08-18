@@ -297,19 +297,27 @@ minikube start --driver=docker ^
     /* ===== Monitoring stack: Prometheus Operator + Grafana + ServiceMonitor ===== */
 
     stage('Install/Upgrade Monitoring Stack') {
-      steps {
-        echo '📈 Ensuring kube-prometheus-stack is installed…'
-        bat '''
+  steps {
+    echo '📈 Ensuring kube-prometheus-stack is installed…'
+    bat '''
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 helm upgrade --install monitoring prometheus-community/kube-prometheus-stack ^
   --namespace monitoring --create-namespace ^
   --set grafana.enabled=true
 '''
-        // Wait for operator to be ready (CRDs/controllers available)
-        bat 'kubectl -n monitoring rollout status deploy/monitoring-kube-prometheus-stack-operator --timeout=6m'
-      }
-    }
+
+    // Show what got created (helps future debug)
+    bat 'kubectl -n monitoring get deploy,sts,po -o wide'
+
+    // Try label used by recent charts
+    bat 'kubectl -n monitoring rollout status deploy -l app.kubernetes.io/name=kube-prometheus-stack-operator --timeout=8m || ver>NUL'
+
+    // Fallback label used by some versions
+    bat 'kubectl -n monitoring rollout status deploy -l app.kubernetes.io/name=prometheus-operator --timeout=8m'
+  }
+}
+
 
     stage('Apply Monitoring CRs') {
       steps {
