@@ -64,6 +64,7 @@ spec:
     app: backend
   type: NodePort
   ports:
+    - name: http 
     - port: 3000
       targetPort: 3000
       nodePort: 30080

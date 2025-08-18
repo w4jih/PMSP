@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: backend-rules
+  namespace: monitoring
+spec:
+  groups:
+  - name: backend.rules
+    rules:
+    - alert: BackendDown
+      expr: up{job="backend"} == 0
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Backend target is down"
+        description: "Prometheus reports backend job is down for 2m"
