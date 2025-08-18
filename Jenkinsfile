@@ -4,10 +4,8 @@ pipeline {
   tools { nodejs 'NodeJS_20' }
 
   environment {
-    IMAGE_LOCAL       = 'w4jih/pmsp-app:latest'
-    KUBE_NS           = 'psmp'
-    // 🟢 Mettre le kubeconfig dans le workspace Jenkins
-    KUBECONFIG        = "${WORKSPACE}\\.kube\\config"
+    IMAGE_LOCAL = 'w4jih/pmsp-app:latest'
+    KUBE_NS     = 'psmp'
     POSTGRES_PASSWORD = 'glace 123'
   }
 
@@ -38,22 +36,10 @@ pipeline {
       steps {
         echo '🚀 Ensuring Minikube…'
         bat '''
-        echo === Resetting Minikube ===
-        minikube delete || ver >NUL
-
-        echo === Starting Minikube ===
-        minikube start --driver=docker --wait=apiserver,system_pods,default_sa --wait-timeout=6m
-
-        echo === Setting kubeconfig ===
-        if not exist %WORKSPACE%\\.kube mkdir %WORKSPACE%\\.kube
-        minikube kubectl -- config view --raw > %KUBECONFIG%
-
-        echo === Minikube status ===
-        minikube status
-
-        echo === Checking nodes ===
-        kubectl get nodes
-        '''
+minikube delete || ver >NUL
+minikube start --driver=docker --wait=apiserver,system_pods,default_sa --wait-timeout=6m
+'''
+        bat 'kubectl get nodes'
       }
     }
 
