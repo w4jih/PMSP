@@ -94,10 +94,10 @@ minikube start --driver=docker --wait=apiserver,system_pods,default_sa --wait-ti
     stage('Wait for Rollout & Smoke Test') {
       steps {
         echo '⏳ Waiting for rollout…'
-        bat 'kubectl -n %KUBE_NS% rollout status deploy/pmsp-app --timeout=6m'
+        bat 'kubectl rollout status deploy/pmsp-app --timeout=6m'
 
         echo '🔎 Pods:'
-        bat 'kubectl -n %KUBE_NS% get pods -o wide'
+        bat 'kubectl get pods -o wide'
 
         echo '🧪 Smoke Test via kubectl port-forward'
         powershell '''
