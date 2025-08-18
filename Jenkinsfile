@@ -37,11 +37,7 @@ pipeline {
         echo '🚀 Ensuring Minikube…'
         bat '''
 minikube delete || ver >NUL
-minikube start --driver=docker ^
-  --docker-env HTTP_PROXY= ^
-  --docker-env HTTPS_PROXY= ^
-  --docker-env NO_PROXY=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local ^
-  --docker-env no_proxy=localhost,127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local ^
+minikube start --driver=docker ^ 
   --wait=apiserver,system_pods,default_sa --wait-timeout=6m
 '''
         bat 'kubectl get nodes'
@@ -99,7 +95,7 @@ minikube start --driver=docker ^
     stage('Wait for Rollout & Smoke Test') {
       steps {
         echo '⏳ Waiting for rollout…'
-        bat 'kubectl -n %KUBE_NS% rollout status deploy/w4jih/pmsp-app --timeout=6m'
+        bat 'kubectl -n %KUBE_NS% rollout status deploy/pmsp-app --timeout=6m'
 
         echo '🔎 Pods:'
         bat 'kubectl -n %KUBE_NS% get pods -o wide'
@@ -109,7 +105,7 @@ minikube start --driver=docker ^
           $ErrorActionPreference = "Stop"
 
           $pf = Start-Process -FilePath "kubectl" `
-                -ArgumentList @("-n",$env:KUBE_NS,"port-forward","svc/backend","3001:3000","--address=127.0.0.1") `
+                -ArgumentList @("-n",$env:KUBE_NS,"port-forward","svc/pmsp-app-service","3001:3000","--address=127.0.0.1") `
                 -WindowStyle Hidden -PassThru
           try {
             $deadline = [DateTime]::UtcNow.AddSeconds(25)
