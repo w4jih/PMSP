@@ -4,15 +4,15 @@ pipeline {
     environment {
         APP_NAME = "monapp"
         IMAGE_NAME = "monimage:latest"
-        DOCKER_TLS_VERIFY = ""
-        DOCKER_HOST = ""
-        DOCKER_CERT_PATH = ""
+        DOCKER_TLS_VERIFY = "1"
+        DOCKER_HOST = "tcp://127.0.0.1:63008"
+        DOCKER_CERT_PATH = "C:\Users\21655\.minikube\certs"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/w4jih/PMSP.git'
+                git branch: 'pipeline', url: 'https://github.com/w4jih/PMSP.git'
             }
         }
 
