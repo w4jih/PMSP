@@ -68,7 +68,7 @@ minikube start --driver=docker ^
       }
     }
 
-    stage('Build Docker Image') {a
+    stage('Build Docker Image') {
       steps {
         echo '🐳 Building backend image…'
         bat 'docker build -t %IMAGE_LOCAL% .'
