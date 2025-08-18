@@ -64,7 +64,7 @@ spec:
     app: backend
   type: NodePort
   ports:
-    - name: http 
-    - port: 3000
+    - name: http           # <-- same list item
+      port: 3000
       targetPort: 3000
-      nodePort: 30080
+      nodePort: 30080      # must be 30000–32767
