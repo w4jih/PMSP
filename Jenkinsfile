@@ -99,7 +99,7 @@ minikube start --driver=docker ^
     stage('Wait for Rollout & Smoke Test') {
       steps {
         echo '⏳ Waiting for rollout…'
-        bat 'kubectl -n %KUBE_NS% rollout status deploy/pmsp-app --timeout=6m'
+        bat 'kubectl -n %KUBE_NS% rollout status deploy/w4jih/pmsp-app --timeout=6m'
 
         echo '🔎 Pods:'
         bat 'kubectl -n %KUBE_NS% get pods -o wide'
